@@ -25,6 +25,8 @@ message ClientMsg{
     int seqNum;
     int totNumPackets;
     string protocol;
+    simtime_t sendTime;
+    int64   byteLength;
     
     //string anotherField;
     //double arrayField1[];

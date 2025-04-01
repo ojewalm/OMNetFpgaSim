@@ -33,6 +33,8 @@ class ClientMsg;
  *     int seqNum;
  *     int totNumPackets;
  *     string protocol;
+ *     simtime_t sendTime;
+ *     int64 byteLength;
  * 
  *     //string anotherField;
  *     //double arrayField1[];
@@ -51,6 +53,8 @@ class ClientMsg : public ::omnetpp::cMessage
     int seqNum = 0;
     int totNumPackets = 0;
     omnetpp::opp_string protocol;
+    omnetpp::simtime_t sendTime = SIMTIME_ZERO;
+    int64_t byteLength = 0;
 
   private:
     void copy(const ClientMsg& other);
@@ -90,6 +94,12 @@ class ClientMsg : public ::omnetpp::cMessage
 
     virtual const char * getProtocol() const;
     virtual void setProtocol(const char * protocol);
+
+    virtual omnetpp::simtime_t getSendTime() const;
+    virtual void setSendTime(omnetpp::simtime_t sendTime);
+
+    virtual int64_t getByteLength() const;
+    virtual void setByteLength(int64_t byteLength);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const ClientMsg& obj) {obj.parsimPack(b);}

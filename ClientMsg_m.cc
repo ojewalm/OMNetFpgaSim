@@ -183,6 +183,8 @@ void ClientMsg::copy(const ClientMsg& other)
     this->seqNum = other.seqNum;
     this->totNumPackets = other.totNumPackets;
     this->protocol = other.protocol;
+    this->sendTime = other.sendTime;
+    this->byteLength = other.byteLength;
 }
 
 void ClientMsg::parsimPack(omnetpp::cCommBuffer *b) const
@@ -196,6 +198,8 @@ void ClientMsg::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->seqNum);
     doParsimPacking(b,this->totNumPackets);
     doParsimPacking(b,this->protocol);
+    doParsimPacking(b,this->sendTime);
+    doParsimPacking(b,this->byteLength);
 }
 
 void ClientMsg::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -209,6 +213,8 @@ void ClientMsg::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->seqNum);
     doParsimUnpacking(b,this->totNumPackets);
     doParsimUnpacking(b,this->protocol);
+    doParsimUnpacking(b,this->sendTime);
+    doParsimUnpacking(b,this->byteLength);
 }
 
 int ClientMsg::getStreamId() const
@@ -291,6 +297,26 @@ void ClientMsg::setProtocol(const char * protocol)
     this->protocol = protocol;
 }
 
+omnetpp::simtime_t ClientMsg::getSendTime() const
+{
+    return this->sendTime;
+}
+
+void ClientMsg::setSendTime(omnetpp::simtime_t sendTime)
+{
+    this->sendTime = sendTime;
+}
+
+int64_t ClientMsg::getByteLength() const
+{
+    return this->byteLength;
+}
+
+void ClientMsg::setByteLength(int64_t byteLength)
+{
+    this->byteLength = byteLength;
+}
+
 class ClientMsgDescriptor : public omnetpp::cClassDescriptor
 {
   private:
@@ -304,6 +330,8 @@ class ClientMsgDescriptor : public omnetpp::cClassDescriptor
         FIELD_seqNum,
         FIELD_totNumPackets,
         FIELD_protocol,
+        FIELD_sendTime,
+        FIELD_byteLength,
     };
   public:
     ClientMsgDescriptor();
@@ -370,7 +398,7 @@ const char *ClientMsgDescriptor::getProperty(const char *propertyName) const
 int ClientMsgDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *base = getBaseClassDescriptor();
-    return base ? 8+base->getFieldCount() : 8;
+    return base ? 10+base->getFieldCount() : 10;
 }
 
 unsigned int ClientMsgDescriptor::getFieldTypeFlags(int field) const
@@ -390,8 +418,10 @@ unsigned int ClientMsgDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,    // FIELD_seqNum
         FD_ISEDITABLE,    // FIELD_totNumPackets
         FD_ISEDITABLE,    // FIELD_protocol
+        FD_ISEDITABLE,    // FIELD_sendTime
+        FD_ISEDITABLE,    // FIELD_byteLength
     };
-    return (field >= 0 && field < 8) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 10) ? fieldTypeFlags[field] : 0;
 }
 
 const char *ClientMsgDescriptor::getFieldName(int field) const
@@ -411,8 +441,10 @@ const char *ClientMsgDescriptor::getFieldName(int field) const
         "seqNum",
         "totNumPackets",
         "protocol",
+        "sendTime",
+        "byteLength",
     };
-    return (field >= 0 && field < 8) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 10) ? fieldNames[field] : nullptr;
 }
 
 int ClientMsgDescriptor::findField(const char *fieldName) const
@@ -427,6 +459,8 @@ int ClientMsgDescriptor::findField(const char *fieldName) const
     if (strcmp(fieldName, "seqNum") == 0) return baseIndex + 5;
     if (strcmp(fieldName, "totNumPackets") == 0) return baseIndex + 6;
     if (strcmp(fieldName, "protocol") == 0) return baseIndex + 7;
+    if (strcmp(fieldName, "sendTime") == 0) return baseIndex + 8;
+    if (strcmp(fieldName, "byteLength") == 0) return baseIndex + 9;
     return base ? base->findField(fieldName) : -1;
 }
 
@@ -447,8 +481,10 @@ const char *ClientMsgDescriptor::getFieldTypeString(int field) const
         "int",    // FIELD_seqNum
         "int",    // FIELD_totNumPackets
         "string",    // FIELD_protocol
+        "omnetpp::simtime_t",    // FIELD_sendTime
+        "int64",    // FIELD_byteLength
     };
-    return (field >= 0 && field < 8) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 10) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **ClientMsgDescriptor::getFieldPropertyNames(int field) const
@@ -539,6 +575,8 @@ std::string ClientMsgDescriptor::getFieldValueAsString(omnetpp::any_ptr object, 
         case FIELD_seqNum: return long2string(pp->getSeqNum());
         case FIELD_totNumPackets: return long2string(pp->getTotNumPackets());
         case FIELD_protocol: return oppstring2string(pp->getProtocol());
+        case FIELD_sendTime: return simtime2string(pp->getSendTime());
+        case FIELD_byteLength: return int642string(pp->getByteLength());
         default: return "";
     }
 }
@@ -563,6 +601,8 @@ void ClientMsgDescriptor::setFieldValueAsString(omnetpp::any_ptr object, int fie
         case FIELD_seqNum: pp->setSeqNum(string2long(value)); break;
         case FIELD_totNumPackets: pp->setTotNumPackets(string2long(value)); break;
         case FIELD_protocol: pp->setProtocol((value)); break;
+        case FIELD_sendTime: pp->setSendTime(string2simtime(value)); break;
+        case FIELD_byteLength: pp->setByteLength(string2int64(value)); break;
         default: throw omnetpp::cRuntimeError("Cannot set field %d of class 'ClientMsg'", field);
     }
 }
@@ -585,6 +625,8 @@ omnetpp::cValue ClientMsgDescriptor::getFieldValue(omnetpp::any_ptr object, int 
         case FIELD_seqNum: return pp->getSeqNum();
         case FIELD_totNumPackets: return pp->getTotNumPackets();
         case FIELD_protocol: return pp->getProtocol();
+        case FIELD_sendTime: return pp->getSendTime().dbl();
+        case FIELD_byteLength: return (omnetpp::intval_t)(pp->getByteLength());
         default: throw omnetpp::cRuntimeError("Cannot return field %d of class 'ClientMsg' as cValue -- field index out of range?", field);
     }
 }
@@ -609,6 +651,8 @@ void ClientMsgDescriptor::setFieldValue(omnetpp::any_ptr object, int field, int 
         case FIELD_seqNum: pp->setSeqNum(omnetpp::checked_int_cast<int>(value.intValue())); break;
         case FIELD_totNumPackets: pp->setTotNumPackets(omnetpp::checked_int_cast<int>(value.intValue())); break;
         case FIELD_protocol: pp->setProtocol(value.stringValue()); break;
+        case FIELD_sendTime: pp->setSendTime(value.doubleValue()); break;
+        case FIELD_byteLength: pp->setByteLength(omnetpp::checked_int_cast<int64_t>(value.intValue())); break;
         default: throw omnetpp::cRuntimeError("Cannot set field %d of class 'ClientMsg'", field);
     }
 }

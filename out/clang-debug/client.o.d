@@ -1,4 +1,6 @@
-out/clang-debug//client.o: client.cc \
-  /Users/OJEWALM/Desktop/omnetpp-6.0.3/include/omnetpp.h
+out/clang-debug//Client.o: Client.cc \
+  /Users/OJEWALM/Desktop/omnetpp-6.0.3/include/omnetpp.h ClientMsg_m.h
 
 /Users/OJEWALM/Desktop/omnetpp-6.0.3/include/omnetpp.h:
+
+ClientMsg_m.h:
